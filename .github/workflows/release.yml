@@ -25,7 +25,7 @@ jobs:
     - name: Install Dependencies
       run: npm install
     - name: get-project-version
-      run: echo 'PACKAGE_VERSION=$(node -p "require('.\package.json').version")' >> $GITHUB_ENV
+      run: echo -e "PACKAGE_VERSION=$(npm pkg get version | sed 's/"//g')" >> $GITHUB_ENV
     - name: Packaging for windows platform
       run: npm run package_win
     - name: Release Windows EXE
