@@ -36,3 +36,4 @@ jobs:
         file_glob: true
         overwrite: true
         body: Version - ${{ env.PACKAGE_VERSION }}
+        tag: v${{ env.PACKAGE_VERSION }}
