@@ -6,11 +6,12 @@ on:
   pull_request:
     branches: [ "main" ]
 
+permissions:
+  contents: write
+
 jobs:
-  build:
-
+  windows-build:
     runs-on: windows-latest
-
     strategy:
       matrix:
         node-version: [20.x]
@@ -24,7 +25,7 @@ jobs:
     - name: Install Dependencies
       run: npm install
     - name: get-project-version
-      run: echo "PACKAGE_VERSION=$(npm pkg get version | sed 's/"//g')" >> $GITHUB_ENV
+      run: Add-Content -Path ${env:GITHUB_ENV} -Value "PACKAGE_VERSION=$(npm pkg get version | sed 's/"//g')"
     - name: Packaging for windows platform
       run: npm run package_win
     - name: Release Windows EXE
