@@ -62,6 +62,8 @@
     "vatex": "^0.1.0"
   },
   "build": {
+    "appId": "com.y1han.option-toolbox",
+    "artifactName": "option-toolbox-${version}-${os}-${arch}.${ext}",
     "files": [
       ".vite/**"
     ],
