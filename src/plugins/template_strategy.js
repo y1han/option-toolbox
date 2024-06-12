@@ -25,7 +25,7 @@ const template_call_900 = {
     option_price: 0.0040,
     notional: 10000,
     vol_pct: 26.7124,
-    use_vol: false
+    use_vol: true
 }  // 10006975.SH 2024/03/25
 
 const template_put_850 = {
@@ -35,7 +35,7 @@ const template_put_850 = {
     option_price: 0.0428,
     notional: 10000,
     vol_pct: 27.1559,
-    use_vol: false
+    use_vol: true
 }  // 10006983.SH 2024/03/25
 
 const template_put_800 = {
@@ -45,7 +45,7 @@ const template_put_800 = {
     option_price: 0.016,
     notional: 10000,
     vol_pct: 26.9841,
-    use_vol: false
+    use_vol: true
 }  // 10006982.SH 2024/03/25
 
 const template_put_900 = {
@@ -55,7 +55,7 @@ const template_put_900 = {
     option_price: 0.085,
     notional: 10000,
     vol_pct: 31.8733,
-    use_vol: false
+    use_vol: true
 }  // 10006984.SH 2024/03/25
 
 const template_underlying = {
