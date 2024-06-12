@@ -56,6 +56,8 @@ jobs:
         run: echo "PACKAGE_VERSION=$(npm pkg get version | sed 's/"//g')" >> $GITHUB_ENV
       - name: Packaging for mac platform
         run: npm run package_mac
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Release MAC ZIP
         uses: svenstaro/upload-release-action@v2
         with:
