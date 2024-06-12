@@ -32,8 +32,36 @@ jobs:
       uses: svenstaro/upload-release-action@v2
       with:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
-        file: ./dist/option-toolbox-${{ env.PACKAGE_VERSION }}-*.exe
+        file: ./dist/option-toolbox-${{ env.PACKAGE_VERSION }}-win-*.exe
         file_glob: true
         overwrite: true
         body: Version - ${{ env.PACKAGE_VERSION }}
         tag: v${{ env.PACKAGE_VERSION }}
+
+  mac-build:
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        node-version: [ 20.x ]
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: Install Dependencies
+        run: npm install
+      - name: get-project-version
+        run: echo "PACKAGE_VERSION=$(npm pkg get version | sed 's/"//g')" >> $GITHUB_ENV
+      - name: Packaging for mac platform
+        run: npm run package_mac
+      - name: Release MAC ZIP
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: ./dist/option-toolbox-${{ env.PACKAGE_VERSION }}-mac-*.zip
+          file_glob: true
+          overwrite: true
+          body: Version - ${{ env.PACKAGE_VERSION }}
+          tag: v${{ env.PACKAGE_VERSION }}

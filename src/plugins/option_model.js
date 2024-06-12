@@ -90,7 +90,13 @@ export class EuropeanOption {
 
         if (fa * fb > 0) {
             // Root is not bracketed.
-            throw new Error(`Root is not bracketed: [${fa}, ${fb}].`);
+            // throw new Error(`Root is not bracketed: [${fa}, ${fb}].`);
+            console.log(`Root is not bracketed: [${fa}, ${fb}].`);
+            if (Math.abs(fa) < Math.abs(fb)) {
+                return a;
+            } else {
+                return b;
+            }
         }
 
         if (Math.abs(fa) < Math.abs(fb)) {
@@ -160,10 +166,11 @@ export class EuropeanOption {
         // throw new Error(
         //     'Could not achieve required tolerance within iteration limit.'
         // );
-        return undefined;
+        console.log('Could not achieve required tolerance within iteration limit.')
+        return b;
     }
 
     implied_volatility() {
-        return this.brent(0, 100000000, 1e-8, 10000);
+        return this.brent(0, 10000, 1e-9, 10000);
     }
 }
