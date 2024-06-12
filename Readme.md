@@ -35,6 +35,10 @@ Inspired by <a href="https://optioncreator.com"> Option Creator </a>
     npm run package_mac  # MacOS (arm64架构)
   ```
 
+- mac系统出现"Option Toolbox.app Is Damaged and Can’t Be Opened. You Should Move It To The Trash"错误
+    ```shell
+  xattr -c <文件路径>
+  ```
 
 ## 主要工具
 - Electron
