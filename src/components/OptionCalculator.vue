@@ -1,5 +1,5 @@
 <script>
-import {EuropeanOption} from "/src/plugins/option_model";
+import {EuropeanOption, optionAttributes} from "/src/plugins/option_model";
 
 export default {
   name: "OptionCalculator",
@@ -74,13 +74,7 @@ export default {
       return this.option_basics.volatility / 100;
     },
     getTableContent() {
-      return [
-        {title: "Delta", func: "delta", multiplier: this.option_basics.notional},
-        {title: "Gamma", func: "gamma", multiplier: this.option_basics.notional},
-        {title: "Vega", func: "vega", multiplier: this.option_basics.notional},
-        {title: "Theta", func: "theta", multiplier: this.option_basics.notional},
-        {title: "Rho", func: "rho", multiplier: this.option_basics.notional},
-      ]
+      return optionAttributes;
     }
   }
 }
@@ -164,10 +158,10 @@ export default {
               <tr v-for="item in getTableContent()" :key="item.title">
                 <td style="text-align: center; font-weight: bold">{{ item.title }}</td>
                 <td :class="{negative: getCall()[item.func](getVol()) < 0}">
-                  {{ round(getCall()[item.func](getVol()) * item.multiplier, 6) }}
+                  {{ round(getCall()[item.func](getVol()), 6) }}
                 </td>
                 <td :class="{negative: getPut()[item.func](getVol()) < 0}">
-                  {{ round(getPut()[item.func](getVol()) * item.multiplier, 6) }}
+                  {{ round(getPut()[item.func](getVol()), 6) }}
                 </td>
               </tr>
               </tbody>

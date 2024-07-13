@@ -1,12 +1,13 @@
 {
   "name": "option_toolbox",
   "productName": "Option Toolbox",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "期权计算相关",
   "main": ".vite/build/main.js",
   "scripts": {
     "start": "electron-forge start",
     "package_single": "electron-forge package",
+    "package": "electron-builder",
     "package_win": "electron-forge package && electron-builder --win portable --x64",
     "package_mac": "electron-forge package && electron-builder --mac -c.mac.identity=null",
     "make": "electron-forge make",

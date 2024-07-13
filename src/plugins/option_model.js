@@ -1,15 +1,69 @@
 import { normal_cdf, normal_pdf } from "./math";
 
-export class EuropeanOption {
+export let optionAttributes = [
+    {title: "Delta", func: "delta"},
+    {title: "Gamma", func: "gamma"},
+    {title: "Vega", func: "vega"},
+    {title: "Theta", func: "theta"},
+    {title: "Rho", func: "rho"}
+];
+
+export class Asset {
+    constructor(underlying_price, notional) {
+        this.underlying_price = underlying_price;
+        this.notional = notional;
+    }
+
+    delta_per_unit(sigma) {
+        return 1;
+    }
+
+    gamma_per_unit(sigma) {
+        return 0;
+    }
+
+    vega_per_unit(sigma) {
+        return 0;
+    }
+
+    theta_per_unit(sigma) {
+        return 0;
+    }
+
+    rho_per_unit(sigma) {
+        return 0;
+    }
+
+    delta(sigma) {
+        return this.delta_per_unit(sigma) * this.notional;
+    }
+
+    gamma(sigma) {
+        return this.gamma_per_unit(sigma) * this.notional;
+    }
+
+    vega(sigma) {
+        return this.vega_per_unit(sigma) * this.notional;
+    }
+
+    theta(sigma) {
+        return this.theta_per_unit(sigma) * this.notional;
+    }
+
+    rho(sigma) {
+        return this.rho_per_unit(sigma) * this.notional;
+    }
+}
+
+export class EuropeanOption extends Asset {
     constructor(option_type, option_price, underlying_price, strike, ttm, r, q, notional) {
+        super(underlying_price, notional);
         this.option_type = option_type[0].toUpperCase();
         this.option_price = option_price;
-        this.underlying_price = underlying_price;
         this.strike = strike;
         this.ttm = ttm;
         this.r = r;
         this.q = q;
-        this.notional = notional;
     }
 
     d1(sigma) {
@@ -22,7 +76,7 @@ export class EuropeanOption {
             (this.r - this.q - sigma ** 2 / 2) * this.ttm) / (sigma * Math.sqrt(this.ttm));
     }
 
-    delta(sigma) {
+    delta_per_unit(sigma) {
         if (this.option_type === "C") {
             return normal_cdf(this.d1(sigma)) * Math.exp(-this.q * this.ttm);
         } else if (this.option_type === "P") {
@@ -32,17 +86,17 @@ export class EuropeanOption {
         }
     }
 
-    gamma(sigma) {
+    gamma_per_unit(sigma) {
         return (normal_pdf(this.d1(sigma)) * Math.exp(-this.q * this.ttm) /
             (this.underlying_price * sigma * Math.sqrt(this.ttm)));
     }
 
-    vega(sigma) {
+    vega_per_unit(sigma) {
         return this.underlying_price * Math.sqrt(this.ttm) *
             normal_pdf(this.d1(sigma)) * Math.exp(-this.q * this.ttm);
     }
 
-    theta(sigma) {
+    theta_per_unit(sigma) {
         if (this.option_type === "C") {
             return -(this.underlying_price * sigma * normal_pdf(this.d1(sigma)) / (2 * Math.sqrt(this.ttm))
                 - this.q * this.underlying_price * normal_cdf(this.d1(sigma)) * Math.exp(-this.q * this.ttm)
@@ -56,7 +110,7 @@ export class EuropeanOption {
         }
     }
 
-    rho(sigma) {
+    rho_per_unit(sigma) {
         if (this.option_type === "C") {
             return this.ttm * this.strike * Math.exp(-this.ttm * this.r) * normal_cdf(this.d2(sigma));
         } else if (this.option_type === "P") {
@@ -171,6 +225,6 @@ export class EuropeanOption {
     }
 
     implied_volatility() {
-        return this.brent(0, 10000, 1e-9, 10000);
+        return this.brent(0, 5, 1e-9, 10000);
     }
 }

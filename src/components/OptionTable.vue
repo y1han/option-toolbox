@@ -1,5 +1,5 @@
 <script>
-import {EuropeanOption} from "../plugins/option_model";
+import {EuropeanOption, Asset, optionAttributes} from "../plugins/option_model";
 import Chart from "/src/components/OptionPnLChart.vue";
 import template_strategy from "/src/plugins/template_strategy";
 
@@ -225,7 +225,7 @@ export default {
           axisPointer: {
             type: 'cross'
           },
-          valueFormatter: (value) => value.toFixed(2)
+          valueFormatter: (value) => parseFloat(value).toFixed(2)
         },
         toolbox: {
           show: true,
@@ -309,34 +309,32 @@ export default {
       };
     },
     getGreeksTableContent() {
-      return [
-        {title: "Delta", attr_name: "delta"},
-        {title: "Gamma", attr_name: "gamma"},
-        {title: "Vega", attr_name: "vega"},
-        {title: "Theta", attr_name: "theta"},
-        {title: "Rho", attr_name: "rho"},
-      ]
+      return optionAttributes;
     },
     getPortfolioGreeks() {
-      let optionGreeks = {delta: 0, gamma: 0, theta: 0, vega: 0, rho: 0};
+      let greeks = optionAttributes.map(x => x.func);
+      let optionGreeks = {};
+      for (const item of greeks) {
+        optionGreeks[item] = 0;
+      }
       let up = this.basic_attributes.underlying_price;
       let rf = this.basic_attributes.risk_free_rate_pct / 100;
       let q = this.basic_attributes.dividend_rate_pct / 100;
       this.options.forEach(function (item) {
+        let netQty = item.quantity * (item.buy_sell === "买" ? 1 : -1);
         if (item.asset_type === "现货标的") {
-          let delta = item.quantity * (item.buy_sell === "买" ? 1 : -1);
-          optionGreeks["delta"] += delta;
+          let asset = new Asset(up, 1);
+          for (const g of greeks) {
+            optionGreeks[g] += netQty * asset[g](0.);
+          }
         } else {
           let optType = item.asset_type === "认购期权" ? "C" : "P";
           let opt = new EuropeanOption(optType, item.option_price, up, item.strike,
               item.dte / 365, rf, q, item.notional);
-          let netQty = item.quantity * (item.buy_sell === "买" ? 1 : -1);
           let vol = item.vol_pct / 100;
-          optionGreeks["delta"] += netQty * opt.delta(vol) * item.notional;
-          optionGreeks["gamma"] += netQty * opt.gamma(vol) * item.notional;
-          optionGreeks["vega"] += netQty * opt.vega(vol) * item.notional;
-          optionGreeks["theta"] += netQty * opt.theta(vol) * item.notional;
-          optionGreeks["rho"] += netQty * opt.rho(vol) * item.notional;
+          for (const g of greeks) {
+            optionGreeks[g] += netQty * opt[g](vol);
+          }
         }
       })
       return optionGreeks;
@@ -417,7 +415,7 @@ export default {
       </v-row>
       <v-row class="pa-md-6 mx-lg-auto" justify-center tag="option_table">
         <v-data-table :items="current_options" :headers="headers" class="elevation-0" hide-default-footer
-                      disable-pagination>
+                      disable-pagination items-per-page="-1">
           <template v-slot:item.buy_sell="{ item, index }">
             <v-select hide-details variant="solo" v-model="item.buy_sell"
                       @update:modelValue="input_value(index, 'other')"
@@ -525,8 +523,8 @@ export default {
               <tbody>
               <tr v-for="item in getGreeksTableContent()" :key="item.title">
                 <td style="text-align: center; font-weight: bold">{{ item.title }}</td>
-                <td :class="{'negative': getPortfolioGreeks()[item.attr_name] < 0, 'greeks-table': true}">
-                  {{ this.round(getPortfolioGreeks()[item.attr_name], 6) }}
+                <td :class="{'negative': getPortfolioGreeks()[item.func] < 0, 'greeks-table': true}">
+                  {{ this.round(getPortfolioGreeks()[item.func], 6) }}
                 </td>
               </tr>
               </tbody>
