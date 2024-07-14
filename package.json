@@ -1,7 +1,7 @@
 {
   "name": "option_toolbox",
   "productName": "Option Toolbox",
-  "version": "1.0.6",
+  "version": "1.1.0",
   "description": "期权计算相关",
   "main": ".vite/build/main.js",
   "scripts": {
@@ -30,36 +30,27 @@
     "@vue/runtime-core": "^3.4.27",
     "@vue/runtime-dom": "^3.4.27",
     "@vue/shared": "^3.4.27",
+    "acorn": "^8.11.3",
+    "echarts": "^5.5.0",
     "electron": "30.0.3",
     "electron-builder": "^24.13.3",
+    "tslib": "^2.6.2",
     "vite": "^5.2.11",
-    "acorn": "^8.11.3",
-    "vuetify": "^3.6.5",
-    "vite-plugin-vuetify": "^2.0.3",
-
     "vue": "^3.4.27",
     "vue-demi": "^0.14.7",
     "vue-echarts": "^6.7.2",
     "vue-router": "^4.3.2",
-
-    "zrender": "^5.5.0",
-    "tslib": "^2.6.2",
-    "echarts": "^5.5.0"
+    "zrender": "^5.5.0"
   },
   "keywords": [],
-  "author": {
-    "name": "Yi Han",
-    "email": "chris.yi.han@outlook.com"
-  },
   "license": "MIT",
   "dependencies": {
-    "unplugin-fonts": "^1.1.1",
-    "unplugin-vue-components": "^0.27.0",
-    "@mdi/font": "^7.4.47",
+    "@ant-design/icons-vue": "^7.0.1",
+    "ant-design-vue": "^4.2.3",
     "electron-app": "^1.0.0",
     "electron-squirrel-startup": "^1.0.0",
-    "katex": "^0.13.24",
-    "roboto-fontface": "*",
+    "unplugin-fonts": "^1.1.1",
+    "unplugin-vue-components": "^0.27.2",
     "vatex": "^0.1.0"
   },
   "build": {
@@ -69,22 +60,34 @@
       ".vite/**"
     ],
     "win": {
-      "target": [{
+      "target": [
+        {
           "target": "portable",
-          "arch": ["x64"]
-      }]
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
     },
     "mac": {
-      "target": [{
+      "target": [
+        {
           "target": "zip",
-          "arch": ["arm64"]
-      }]
+          "arch": [
+            "arm64"
+          ]
+        }
+      ]
     },
     "linux": {
-      "target": [{
+      "target": [
+        {
           "target": "deb",
-          "arch": ["universal"]
-      }]
+          "arch": [
+            "universal"
+          ]
+        }
+      ]
     }
   }
 }

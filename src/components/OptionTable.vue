@@ -10,17 +10,26 @@ export default {
   name: "OptionTable",
   components: {Chart},
   data: () => ({
-    headers: [
-      {title: '买/卖', align: 'center', sortable: false, key: 'buy_sell', width: '110px'},
-      {title: '合约数量', sortable: false, key: 'quantity', align: 'center', width: '160px'},
-      {title: '认购/认沽/现货', sortable: false, key: 'asset_type', align: 'center', width: '160px'},
-      {title: '行权价', sortable: false, key: 'strike', align: 'center'},
-      {title: '距离到期天数', sortable: false, key: 'dte', align: 'center'},
-      {title: '波动率', sortable: false, key: 'vol_pct', align: 'center', width: '160px'},
-      {title: '期权价格', sortable: false, key: 'option_price', align: 'center'},
-      {title: '合约乘数', sortable: false, key: 'notional', align: 'center'},
-      {title: '现金流', sortable: false, key: 'cash_flow', align: 'center'},
-      {title: '删除', sortable: false, key: 'delete_btn', align: 'center'},
+    table_columns: [
+      {title: '买/卖', dataIndex: 'buy_sell', type: 'select', align: 'center', select_options: [{value: '买',
+          label: '买'}, {value: '卖', label: '卖', input_value: 'other'}], udl_disable: false},
+      {title: '合约数量', dataIndex: 'quantity', type: 'number', align: 'center', precision: 0, pct: false,
+        min: 0, max: 1000000, step: 1, input_value: 'other', udl_disable: false},
+      {title: '认购/认沽/现货', dataIndex: 'asset_type', type: 'select', align: 'center',
+        select_options: [{value: '认购期权', label: '认购期权'}, {value: '认沽期权', label: '认沽期权'},
+          {value: '现货标的', label: '现货标的', input_value: 'other'}], udl_disable: false},
+      {title: '行权价', dataIndex: 'strike', type: 'number', align: 'center', precision: 3, pct: false,
+        min: 0., max: 50, step: 0.001, input_value: 'other', udl_disable: true},
+      {title: '距离到期天数', dataIndex: 'dte', type: 'number', align: 'center', precision: 0, pct: false,
+        min: 0, max: 365, step: 1, input_value: 'other', udl_disable: true},
+      {title: '波动率', dataIndex: 'vol_pct', type: 'number', align: 'center', precision: 4, pct: true,
+        min: 0., max: 300, step: 0.0001, input_value: 'vol', udl_disable: true},
+      {title: '期权价格', dataIndex: 'option_price', type: 'number', align: 'center', precision: 4, pct: false,
+        min: 0., max: 1000, step: 0.0001, input_value: 'price', udl_disable: true},
+      {title: '合约乘数', dataIndex: 'notional', type: 'number', align: 'center', precision: 0, pct: false,
+        min: 10000, max: 50000, step: 1, input_value: 'other', responsive: ['lg'], udl_disable: true},
+      {title: '现金流', dataIndex: 'cash_flow', type: 'cash_flow', align: 'center', responsive: ['lg']},
+      {title: '删除', dataIndex: 'delete_btn', type: 'none', align: 'center'},
     ],
     basic_attributes: {
       underlying_price: 0.82,
@@ -33,26 +42,41 @@ export default {
       day_from_today: 0,
       vol_pct: 30
     },
+    openBase64Modal: false,
     base64_input: "",
   }),
   methods: {
+    showBase64Modal() {
+      this.openBase64Modal = true;
+    },
+    handleBase64ModalOk(e) {
+      this.openBase64Modal = false;
+    },
     input_value(index, input_type) {
       let item = this.options[index];
-      let option_type = (item.asset_type === "认购期权") ? "C" : "P";
-      let option = new EuropeanOption(option_type, item.option_price, this.basic_attributes.underlying_price,
-          item.strike, item.dte / 365, this.basic_attributes.risk_free_rate_pct / 100,
-          this.basic_attributes.dividend_rate_pct / 100, item.notional);
-      if (input_type === "vol") {
-        item.use_vol = true;
-        this.options[index].option_price = this.round(option.theoretical_option_price(item.vol_pct / 100), 4);
-      } else if (input_type === "price") {
-        item.use_vol = false;
-        this.options[index].vol_pct = this.round(option.implied_volatility() * 100, 4);
+      if (item.asset_type === "现货标的") {
+        this.options[index].strike = undefined;
+        this.options[index].dte = undefined;
+        this.options[index].vol_pct = undefined;
+        this.options[index].option_price = undefined;
+        this.options[index].notional = undefined;
       } else {
-        if (item.use_vol) {
-          this.input_value(index, "vol");
+        let option_type = (item.asset_type === "认购期权") ? "C" : "P";
+        let option = new EuropeanOption(option_type, item.option_price, this.basic_attributes.underlying_price,
+            item.strike, item.dte / 365, this.basic_attributes.risk_free_rate_pct / 100,
+            this.basic_attributes.dividend_rate_pct / 100, item.notional);
+        if (input_type === "vol") {
+          item.use_vol = true;
+          this.options[index].option_price = this.round(option.theoretical_option_price(item.vol_pct / 100), 4);
+        } else if (input_type === "price") {
+          item.use_vol = false;
+          this.options[index].vol_pct = this.round(option.implied_volatility() * 100, 4);
         } else {
-          this.input_value(index, "price");
+          if (item.use_vol) {
+            this.input_value(index, "vol");
+          } else {
+            this.input_value(index, "price");
+          }
         }
       }
     },
@@ -76,8 +100,7 @@ export default {
       this.options.push(structuredClone(default_option));
       this.input_value(this.options.length - 1, default_option.use_vol ? "vol": "price");
     },
-    deleteAsset(asset) {
-      const index = this.options.indexOf(asset);
+    deleteAsset(index) {
       this.options.splice(index, 1);
     },
     resetAsset() {
@@ -353,231 +376,194 @@ export default {
 </script>
 
 <template>
-  <v-card class="elevation-1">
-    <v-card-title>期权组合计算</v-card-title>
-    <v-container fluid class="mx-auto">
-      <v-row class="pa-md-6 mx-lg-auto" justify-center tag="basics">
-        <v-col>
-          <text>现货价格</text>
-          <v-text-field hide-details variant="solo" class="right-input"
-                        @input="input_basic_value()"
-                        v-model="this.basic_attributes.underlying_price"
-                        type="number" min="0" step=".001"></v-text-field>
-        </v-col>
-        <v-col>
-          <text>无风险利率</text>
-          <v-text-field hide-details variant="solo" class="right-input" suffix="%"
-                        @input="input_basic_value()"
-                        v-model="this.basic_attributes.risk_free_rate_pct"
-                        type="number" min="0" step=".01"></v-text-field>
-        </v-col>
-        <v-col>
-          <text>红利率</text>
-          <v-text-field hide-details variant="solo" class="right-input" suffix="%"
-                        @input="input_basic_value()"
-                        v-model="this.basic_attributes.dividend_rate_pct"
-                        type="number" min="0" step=".01"></v-text-field>
-        </v-col>
-        <v-col>
-          <text>期权类型</text>
-          <v-select hide-details v-model="this.basic_attributes.option_style"
-                    :items="['欧式', '美式']" disabled></v-select>
-        </v-col>
-        <v-spacer></v-spacer>
-      </v-row>
-      <v-row>
-        <v-col align="right">
-          <v-dialog max-width="500">
-            <template v-slot:activator="{ props: activatorProps }">
-              <v-btn
-                  v-bind="activatorProps"
-                  color="blue"
-                  text="导入Base64"
-                  variant="flat"
-              ></v-btn></template>
-            <template v-slot:default="{ isActive }">
-              <v-card title="Base64导入">
-                <v-text-field v-model="base64_input" style="margin: 20px"></v-text-field>
-                <v-btn variant="tonal" color="blue" @click="readPortfolioByText" style="margin-inline: 4px">导入</v-btn>
-                <v-btn variant="tonal" color="red" @click="resetBase64Input" style="margin-inline: 4px">清除</v-btn>
-                <v-card-actions>
-                  <v-spacer></v-spacer>
-                  <v-btn text="关闭窗口" @click="isActive.value = false"></v-btn>
-                </v-card-actions>
-              </v-card>
+  <a-card title="期权组合计算">
+    <a-row>
+      <a-form layout="inline">
+        <a-form-item label="现货价格">
+          <a-input-number precision=3
+                          step=".001"
+                          @change="input_basic_value()"
+                          v-model:value="basic_attributes.underlying_price" />
+        </a-form-item>
+        <a-form-item label="无风险利率">
+          <a-input-number :min="0"
+                          :max="100"
+                          precision=2
+                          step=".01"
+                          @change="input_basic_value()"
+                          :formatter="value => `${value}%`"
+                          :parser="value => value.replace('%', '')"
+                          v-model:value="basic_attributes.risk_free_rate_pct" />
+        </a-form-item>
+        <a-form-item label="红利率">
+          <a-input-number :min="0"
+                          :max="100"
+                          precision=2
+                          step=".01"
+                          @change="input_basic_value()"
+                          :formatter="value => `${value}%`"
+                          :parser="value => value.replace('%', '')"
+                          v-model:value="basic_attributes.dividend_rate_pct"/>
+        </a-form-item>
+        <a-form-item label="期权类型" >
+          <a-select v-model:value="basic_attributes.option_style" disabled/>
+        </a-form-item>
+      </a-form>
+    </a-row>
+    <a-row>
+      <a-col :span="24" style="text-align: right;">
+        <div>
+          <a-modal v-model:open="openBase64Modal" title="导入Base64" @ok="handleBase64ModalOk">
+            <a-input class="vertical-gap" v-model:value="base64_input"></a-input>
+            <a-button type="primary" @click="readPortfolioByText">导入</a-button>
+            <a-button danger type="text" @click="resetBase64Input">清除</a-button>
+            <template #footer>
+              <a-button key="back" @click="handleBase64ModalOk">返回</a-button>
             </template>
-          </v-dialog>
-          <v-btn variant="flat" color="blue" @click="copyPortfolio" style="margin-inline: 4px">导出Base64至剪切板</v-btn>
-          <v-btn variant="tonal" color="blue" @click="readPortfolio" style="margin-inline: 4px">导入JSON</v-btn>
-          <v-btn variant="tonal" color="blue" @click="savePortfolio" style="margin-inline: 4px">保存JSON</v-btn>
-          <v-btn variant="plain" color="red" @click="resetAsset" style="margin-inline: 4px">重置</v-btn>
-        </v-col>
-      </v-row>
-      <v-row class="pa-md-6 mx-lg-auto" justify-center tag="option_table">
-        <v-data-table :items="current_options" :headers="headers" class="elevation-0" hide-default-footer
-                      disable-pagination items-per-page="-1">
-          <template v-slot:item.buy_sell="{ item, index }">
-            <v-select hide-details variant="solo" v-model="item.buy_sell"
-                      @update:modelValue="input_value(index, 'other')"
-                      hint="买/卖" :items="['买', '卖']"></v-select>
+          </a-modal>
+        </div>
+        <a-button class="horizontal-gap" type="primary" @click="showBase64Modal">导入Base64</a-button>
+        <a-button class="horizontal-gap" type="primary" @click="copyPortfolio">导出Base64至剪切板</a-button>
+        <a-button class="horizontal-gap" @click="readPortfolio">导入JSON</a-button>
+        <a-button class="horizontal-gap" @click="savePortfolio">导出JSON</a-button>
+        <a-button class="horizontal-gap" danger type="text" @click="resetAsset">重置</a-button>
+      </a-col>
+    </a-row>
+    <a-row>
+      <a-table bordered :data-source="current_options" :columns="table_columns"
+               size="middle" pagination=false
+               class="ant-table-striped"
+               :row-class-name="(_record, index) => (index % 2 === 1 ? 'table-striped' : null)">
+        <template #bodyCell="{ index, column, record }">
+          <template v-if="column.type === 'number'">
+            <a-input-number v-model:value="current_options[index][column.dataIndex]"
+                            @change="input_value(index, column.input_value)"
+                            :disabled="column.udl_disable && record.asset_type === '现货标的'"
+                            :precision=column.precision
+                            :min=column.min
+                            :max=column.max
+                            :step=column.step
+                            style="width: 100%"
+                            :class="{'bold': (record.use_vol && column.dataIndex === 'vol_pct') ||
+                            ((!record.use_vol) && column.dataIndex === 'option_price')}"
+                            :formatter="column.pct? value => `${value}%`: value => `${value}`"
+                            :parser="value => value.replace('%', '')"/>
           </template>
-          <template v-slot:item.quantity="{ item }">
-            <v-text-field hide-details variant="solo" class="right-input" v-model="item.quantity"
-                          type="number" :min="item.asset_type === '现货标的' ? 100 : 1"
-                          :step="item.asset_type === '现货标的' ? 100 : 1"
-                          hint="数量"></v-text-field>
+          <template v-else-if="column.type === 'select'">
+            <a-select style="font-weight: bold"
+                      @change="input_value(index, column.input_value)"
+                      :disabled="column.udl_disable && record.asset_type === '现货标的'"
+                      v-model:value="current_options[index][column.dataIndex]" :options="column.select_options"/>
           </template>
-          <template v-slot:item.asset_type="{ item, index }">
-            <v-select hide-details variant="solo" v-model="item.asset_type"
-                      @update:modelValue="input_value(index, 'other')"
-                      hint="认购期权/认沽期权/现货" :items="['认购期权', '认沽期权', '现货标的']"></v-select>
+          <template v-else-if="column.type === 'cash_flow'">
+            <div style="text-align: center;">
+              {{record.asset_type === "现货标的" ?
+                round(record.quantity * this.basic_attributes.underlying_price * (record.buy_sell === "买" ? -1 : 1), 4) :
+                round(record.option_price * record.quantity * record.notional * (record.buy_sell === "买" ? -1 : 1), 4)}}</div>
           </template>
-          <template v-slot:item.strike="{ item, index }">
-            <v-text-field hide-details variant="solo" class="right-input" v-model="item.strike" type="number" min="0"
-                          step=".001" @input="input_value(index, 'other')"
-                          v-if="item.asset_type !== '现货标的'" hint="行权价"></v-text-field>
+          <template v-else>
+            <a-popconfirm
+                v-if="current_options.length"
+                title="确认删除？"
+                @confirm="deleteAsset(index)"
+            > <DeleteTwoTone two-tone-color="#eb2f96"/>
+            </a-popconfirm>
           </template>
-          <template v-slot:item.vol_pct="{ item, index }">
-            <v-text-field hide-details variant="solo" class="" v-model="item.vol_pct" type="number" min="0"
-                          :class="{'right-input': true, 'bold': item.use_vol}" @input="input_value(index, 'vol')"
-                          step=".0001" v-if="item.asset_type !== '现货标的'" hint="波动率" suffix="%"></v-text-field>
-          </template>
-          <template v-slot:item.dte="{ item, index }">
-            <v-text-field hide-details variant="solo" class="right-input" v-model="item.dte" type="number" min="0"
-                          step="1" @input="input_value(index, 'other')"
-                          v-if="item.asset_type !== '现货标的'" hint="剩余到期日期"></v-text-field>
-          </template>
-          <template v-slot:item.option_price="{ item, index }">
-            <v-text-field hide-details variant="solo" v-model="item.option_price" type="number"
-                          :class="{'right-input': true, 'bold': !item.use_vol}"
-                          min="0" step=".0001" @input="input_value(index, 'price')"
-                          v-if="item.asset_type !== '现货标的'" hint="期权价格"></v-text-field>
-          </template>
-          <template v-slot:item.notional="{ item }">
-            <v-text-field hide-details variant="solo" class="right-input" v-model="item.notional" type="number" min="0"
-                          step="1" v-if="item.asset_type !== '现货标的'" hint="期权合约乘数"></v-text-field>
-          </template>
-          <template v-slot:item.cash_flow="{ item }">
-            {{
-              item.asset_type === "现货标的" ?
-                  round(item.quantity * this.basic_attributes.underlying_price * (item.buy_sell === "买" ? -1 : 1), 4) :
-                  round(item.option_price * item.quantity * item.notional * (item.buy_sell === "买" ? -1 : 1), 4)
-            }}
-          </template>
-          <template v-slot:item.delete_btn="{ item }">
-            <v-btn variant="plain" icon="$close" color="red" @click="deleteAsset(item)"></v-btn>
-          </template>
-          <template v-slot:body.append>
-            <tr class="border_bottom">
-              <td v-for="(header, i) in headers" :key="i">
-                <div v-if="i === 0">
-                  <p style="font-size:120%;"><b>汇总</b></p>
-                </div>
-                <div v-if="header.key === 'cash_flow'">
-                  <p style="font-size:120%;" :style="{color: sumCashFlow() > 0? 'red': 'green'}">
-                    <b>{{ sumCashFlow() }}</b>
-                  </p>
-                </div>
-                <div v-else>
-                  <!-- empty table cells for columns that don't need a sum -->
-                </div>
-              </td>
-            </tr>
-          </template>
-          <template #bottom></template>
-        </v-data-table>
-      </v-row>
-      <v-row class="pa-md-6 mx-lg-auto" justify-center tag="add_asset_btn">
-        <v-btn variant="flat" color="primary" @click="addAsset">增加资产</v-btn>
-      </v-row>
-    </v-container>
-    <v-container fulid class="mx-auto">
-      <v-row>
-        <v-col cols="9">
-          <v-row class="pa-md-6 mx-lg-auto" justify-center tag="basics">
-            <v-col cols="2">
-              <text>T+N日</text>
-                <v-text-field hide-details variant="solo" class="right-input" v-model="this.chart_attributes.day_from_today"
-                              type="number" min="0" :max="max_expiry_day()" step="1"/>
-            </v-col>
-            <v-col cols="2">
-              <text>波动率</text>
-              <v-text-field hide-details variant="solo" class="right-input" v-model="this.chart_attributes.vol_pct"
-                              type="number" min="0" step="1" suffix="%"/>
-            </v-col>
-            <v-spacer></v-spacer>
-          </v-row>
-          <v-row>
-            <Chart :option="getChartAttributes()"/>
-          </v-row>
-        </v-col>
-        <v-col>
-          <v-card>
-            <v-table>
-              <thead>
-              <tr>
-                <th></th>
-                <th style="text-align: center; font-weight: bold">组合风险</th>
-              </tr>
-              </thead>
-              <tbody>
-              <tr v-for="item in getGreeksTableContent()" :key="item.title">
-                <td style="text-align: center; font-weight: bold">{{ item.title }}</td>
-                <td :class="{'negative': getPortfolioGreeks()[item.func] < 0, 'greeks-table': true}">
-                  {{ this.round(getPortfolioGreeks()[item.func], 6) }}
-                </td>
-              </tr>
-              </tbody>
-            </v-table>
-          </v-card>
-        </v-col>
-      </v-row>
-    </v-container>
-  </v-card>
+        </template>
+        <template #summary v-if="screens['lg']">
+          <a-table-summary-row>
+            <a-table-summary-cell v-for="(column, i) in table_columns">
+              <div v-if="i === 0" style="text-align: center; font-weight: bold">
+                合计
+              </div>
+              <p v-else-if="column.type === 'cash_flow'" style="text-align: center"
+                 :style="{color: sumCashFlow() > 0? 'red': 'green'}">
+                <b>{{ sumCashFlow() }}</b>
+              </p>
+            </a-table-summary-cell>
+          </a-table-summary-row>
+        </template>
+      </a-table>
+    </a-row>
+    <a-button type="primary" style="margin: 10px" @click="addAsset">增加资产</a-button>
+
+    <a-row>
+      <a-col style="width: 60%">
+        <a-row>
+          <a-form layout="inline">
+            <a-form-item label="T+N日">
+              <a-input-number :min="0"
+                              :max="max_expiry_day()"
+                              step="1"
+                              precision=0
+                              v-model:value="this.chart_attributes.day_from_today"
+                              :formatter="value => `${value}`"/>
+            </a-form-item>
+            <a-form-item label="波动率">
+              <a-input-number :min="0"
+                              :max="100"
+                              step="1"
+                              precision=2
+                              :formatter="value => `${value}%`"
+                              :parser="value => value.replace('%', '')"
+                              v-model:value="this.chart_attributes.vol_pct" />
+            </a-form-item>
+          </a-form>
+        </a-row>
+        <a-row>
+          <Chart :option="getChartAttributes()"/>
+        </a-row>
+      </a-col>
+      <a-col style="width: 40%">
+        <a-card>
+          <a-descriptions title="组合风险" bordered size="small" :column="1">
+            <a-descriptions-item
+                v-for="item in getGreeksTableContent()"
+                :label="item.title"
+                :label-style="{'font-weight': 'bold'}"
+                :content-style="{'text-align': 'right',
+                'color': (getPortfolioGreeks()[item.func] < 0) ? 'red': 'black'}">
+              <div>
+                {{Intl.NumberFormat(undefined,
+                  {minimumFractionDigits: 6}).format(this.round(getPortfolioGreeks()[item.func], 6))}}
+              </div>
+            </a-descriptions-item>
+          </a-descriptions>
+        </a-card>
+      </a-col>
+    </a-row>
+  </a-card>
 </template>
 
+<script setup>
+import { DeleteTwoTone } from '@ant-design/icons-vue';
+import { Grid } from 'ant-design-vue';
+
+const useBreakpoint = Grid.useBreakpoint;
+const screens = useBreakpoint();
+</script>
+
 <style scoped>
-td :deep(div) {
-  text-align: center;
+.ant-row {
+  margin: 10px;
 }
 
-.greeks-table {
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  border-collapse: collapse;
-  text-align: right;
+.horizontal-gap {
+  margin-inline: 5px;
 }
 
-.negative {
-  color: red;
+.vertical-gap {
+  margin-top: 5px;
+  margin-bottom: 5px;
 }
 
-.v-row {
-  border-radius: 10px;
-}
-
-.v-container {
-  border-radius: 4px;
-}
-
-.v-data-table {
-  border: 1px solid rgba(0, 0, 0, 0.1);
-}
-
-.v-card {
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  border-radius: 10px;
-}
-
-.right-input :deep(input) {
-  text-align: right;
-}
-
-.centered-input :deep(input) {
-  width: 100%;
-  justify-content: center;
-}
-
-.bold {
+.bold * {
   font-weight: bold;
 }
+
+.ant-input-number :deep(input) {
+  text-align: right;
+  padding-right: 24px;
+}
+
 </style>

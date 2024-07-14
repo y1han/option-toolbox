@@ -5,11 +5,9 @@ export default {
 </script>
 
 <template>
-  <v-card class="elevation-1">
-    <v-card-title>参考资料</v-card-title>
-    <v-container>
-      <v-card-title>期权风险指标对照表</v-card-title>
-      <v-table>
+  <a-card title="参考资料">
+    <a-card title="期权风险指标对照表">
+      <table>
         <thead>
         <tr>
           <th></th>
@@ -123,11 +121,10 @@ export default {
           </td>
         </tr>
         </tbody>
-      </v-table>
-    </v-container>
-    <v-container>
-      <v-card-title>代数概念表</v-card-title>
-      <v-table>
+      </table>
+    </a-card>
+    <a-card title="代数概念表">
+      <table>
         <thead>
         <tr>
           <th style="text-align: center">代数</th>
@@ -135,55 +132,73 @@ export default {
         </tr>
         </thead>
         <tbody>
-          <tr>
-            <td>e</td>
-            <td>自然常数</td>
-          </tr>
-          <tr>
-            <td>r</td>
-            <td>无风险利率，默认设定为2.5%。</td>
-          </tr>
-          <tr>
-            <td>q</td>
-            <td>股息率，各标的需单独明确股息率。</td>
-          </tr>
-          <tr>
-            <td><vue-latex :expression="'\\sigma'" display-mode/></td>
-            <td>隐含波动率 (Implied Volatility)，标准算法为数值方法Brent Method，
-              找出使得期权理论价格最接近于给定价格的IV。</td>
-          </tr>
-          <tr>
-            <td>K</td>
-            <td>行权价格</td>
-          </tr>
-          <tr>
-            <td><vue-latex expression="S_{t}" display-mode/></td>
-            <td>现货标的价格</td>
-          </tr>
-          <tr>
-            <td>T - t</td>
-            <td>剩余交易时间（精度以自然日计算；单位：年）</td>
-          </tr>
-          <tr>
-            <td><vue-latex expression="N(x)" display-mode/></td>
-            <td>正态分布的累计概率函数 (Cumulative Distribution Function)。
-              <vue-latex expression="N(x) = \frac{1}{\sqrt{2 \pi}} \int_{-\infty}^{x} e^{-z^2/2}dz" display-mode/></td>
-          </tr>
-          <tr>
-            <td><vue-latex expression="N'(x)" display-mode/></td>
-            <td>正态分布的概率密度函数 (Probability Density Function)。
-              <vue-latex expression="N'(x) = \frac{1}{\sqrt{2 \pi}} e^{-x^2/2}" display-mode/></td>
-          </tr>
+        <tr>
+          <td>e</td>
+          <td>自然常数</td>
+        </tr>
+        <tr>
+          <td>r</td>
+          <td>无风险利率</td>
+        </tr>
+        <tr>
+          <td>q</td>
+          <td>股息率，各标的需单独明确股息率。</td>
+        </tr>
+        <tr>
+          <td><vue-latex :expression="'\\sigma'" display-mode/></td>
+          <td>隐含波动率 (Implied Volatility)，标准算法为数值方法Brent Method，
+            找出使得期权理论价格最接近于给定价格的IV。</td>
+        </tr>
+        <tr>
+          <td>K</td>
+          <td>行权价格</td>
+        </tr>
+        <tr>
+          <td><vue-latex expression="S_{t}" display-mode/></td>
+          <td>现货标的价格</td>
+        </tr>
+        <tr>
+          <td>T - t</td>
+          <td>剩余交易时间（精度以自然日计算；单位：年）</td>
+        </tr>
+        <tr>
+          <td><vue-latex expression="N(x)" display-mode/></td>
+          <td>正态分布的累计概率函数 (Cumulative Distribution Function)。
+            <vue-latex expression="N(x) = \frac{1}{\sqrt{2 \pi}} \int_{-\infty}^{x} e^{-z^2/2}dz" display-mode/></td>
+        </tr>
+        <tr>
+          <td><vue-latex expression="N'(x)" display-mode/></td>
+          <td>正态分布的概率密度函数 (Probability Density Function)。
+            <vue-latex expression="N'(x) = \frac{1}{\sqrt{2 \pi}} e^{-x^2/2}" display-mode/></td>
+        </tr>
         </tbody>
-      </v-table>
-    </v-container>
-  </v-card>
+      </table>
+    </a-card>
+  </a-card>
 </template>
 
 <style scoped>
-v-table, th, tr, td {
-  border: 1px solid rgba(0, 0, 0, 0.1);
+th, tr {
+  border: 1px solid rgba(0, 0, 0, 0.3);
   border-collapse: collapse;
   text-align: center;
+  width: 30%;
+  height: 100%;
+  padding: 10px;
+}
+
+td {
+  border: 1px solid rgba(0, 0, 0, 0.3);
+  border-collapse: collapse;
+  text-align: center;
+  width: 30%;
+  height: 100%;
+  padding: 8px;
+}
+
+table {
+  width: 100%;
+  height: 100%;
+  align-content: center;
 }
 </style>

@@ -4,11 +4,16 @@ import NavBar from "/src/components/NavBar.vue";
 </script>
 
 <template>
-  <v-app>
-    <v-main>
-      <NavBar/>
+  <a-layout style="margin: 20px">
+    <NavBar/>
+    <a-layout-content>
       <RouterView />
-    </v-main>
-    <AppFooter />
-  </v-app>
+    </a-layout-content>
+    <a-layout-footer>
+      <AppFooter />
+    </a-layout-footer>
+  </a-layout>
 </template>
+
+<style scoped>
+</style>

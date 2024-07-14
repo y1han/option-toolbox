@@ -1,7 +1,6 @@
 import { defineConfig } from 'vite';
 import Components from 'unplugin-vue-components/vite'
 import Vue from '@vitejs/plugin-vue'
-import Vuetify, { transformAssetUrls } from 'vite-plugin-vuetify'
 import ViteFonts from 'unplugin-fonts/vite'
 import { pluginExposeRenderer } from './vite.base.config.mjs';
 import { fileURLToPath, URL } from 'node:url'
@@ -21,11 +20,7 @@ export default defineConfig((env) => {
     build: {
       outDir: `.vite/renderer/${name}`,
     },
-    plugins: [Vue({
-      template: { transformAssetUrls }
-    }),
-      // https://github.com/vuetifyjs/vuetify-loader/tree/master/packages/vite-plugin#readme
-      Vuetify(),
+    plugins: [Vue(),
       Components(),
       ViteFonts({
         google: {
