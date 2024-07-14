@@ -43,13 +43,11 @@ Inspired by <a href="https://optioncreator.com"> Option Creator </a>
 ## 主要工具
 - Electron
 - Vue
-- Vuetify
+- Ant Design Vue
 - ECharts
 - KaTex
 
 
 ## 已知问题
 
-1. 输入框无硬性限制，若数值过大可能会造成卡死的状况
-2. 调整窗口大小时会导致部分组件显示有错误
-3. mac版本文件过大，需要进行优化
+1. mac版本文件过大，需要进行优化
