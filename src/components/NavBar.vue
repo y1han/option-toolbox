@@ -6,7 +6,7 @@ export default {
   data: () => ({
     menu_component: [
       {key: "/", label: "期权组合计算", title: "期权组合计算"},
-      {key: "/option_calculator", label: "期权组合计算", title: "期权组合计算"},
+      {key: "/option_calculator", label: "风险指标计算", title: "风险指标计算"},
       {key: "/reference", label: "参考资料", title: "参考资料"}
     ],
     simple_buy_sell: [
