@@ -525,7 +525,7 @@ export default {
                 'color': (getPortfolioGreeks()[item.func] < 0) ? 'red': 'black'}">
               <div>
                 {{Intl.NumberFormat(undefined,
-                  {minimumFractionDigits: 6}).format(this.round(getPortfolioGreeks()[item.func], 6))}}
+                  {minimumFractionDigits: 6}).format(round(getPortfolioGreeks()[item.func], 6))}}
               </div>
             </a-descriptions-item>
           </a-descriptions>
