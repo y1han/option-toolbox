@@ -496,7 +496,7 @@ export default {
                               :max="max_expiry_day()"
                               step="1"
                               precision=0
-                              v-model:value="this.chart_attributes.day_from_today"
+                              v-model:value="chart_attributes.day_from_today"
                               :formatter="value => `${value}`"/>
             </a-form-item>
             <a-form-item label="波动率">
@@ -506,7 +506,7 @@ export default {
                               precision=2
                               :formatter="value => `${value}%`"
                               :parser="value => value.replace('%', '')"
-                              v-model:value="this.chart_attributes.vol_pct" />
+                              v-model:value="chart_attributes.vol_pct" />
             </a-form-item>
           </a-form>
         </a-row>
