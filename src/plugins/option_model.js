@@ -98,11 +98,11 @@ export class EuropeanOption extends Asset {
 
     theta_per_unit(sigma) {
         if (this.option_type === "C") {
-            return -(this.underlying_price * sigma * normal_pdf(this.d1(sigma)) / (2 * Math.sqrt(this.ttm))
+            return -(this.underlying_price * Math.exp(-this.q * this.ttm) * sigma * normal_pdf(this.d1(sigma)) / (2 * Math.sqrt(this.ttm))
                 - this.q * this.underlying_price * normal_cdf(this.d1(sigma)) * Math.exp(-this.q * this.ttm)
                 + this.r * this.strike * Math.exp(-this.ttm * this.r) * normal_cdf(this.d2(sigma)));
         } else if (this.option_type === "P") {
-            return -(this.underlying_price * sigma * normal_pdf(this.d1(sigma)) / (2 * Math.sqrt(this.ttm))
+            return -(this.underlying_price * Math.exp(-this.q * this.ttm) * sigma * normal_pdf(this.d1(sigma)) / (2 * Math.sqrt(this.ttm))
                 + this.q * this.underlying_price * normal_cdf(-this.d1(sigma)) * Math.exp(-this.q * this.ttm) +
                 - this.r * this.strike * Math.exp(-this.ttm * this.r) * normal_cdf(-this.d2(sigma)));
         } else {
